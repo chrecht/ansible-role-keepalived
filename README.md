@@ -1,22 +1,20 @@
 # ansbile-role-keepalived
 =========
 
+## Use this role
 
+add to your requirements.yaml:
 ```
-keepalived:
-    notification_email:
-        - me@domain.tld
-    instances:
-        - name: "proxysql_1"
-          priority: 101
-          iface: ens160
-          state: BACKUP
-          router_id: 13
-          vip: 172.31.31.16
-        - name: "proxysql_2"
-          priority: 100
-          iface: ens160
-          state: BACKUP
-          router_id: 14
-          vip: 172.31.31.17
+---
+roles:
+  - name: ansible-role-keepalived
+    src: git@github.com:chrecht/ansible-role-keepalived.git
+    scm: git
+    version: v0.0.1
 ```
+
+then install the role:
+`ansible-galaxy install -f -r requirements.yaml`
+
+## Example
+Full example can be found in the `example/` directory.

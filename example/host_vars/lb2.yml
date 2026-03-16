@@ -1,0 +1,46 @@
+---
+
+keepalived:
+  notification_email:
+    - me@domain.tld
+  notification_email_from: me@domain.tld
+  smtp_server:  127.0.0.1
+  smtp_connect_timeout: 30
+
+  haproxy: 1
+
+  instances:
+
+    - name: "haproxy_1"
+      priority: 1
+      iface: ens192
+      state: BACKUP
+      router_id: 11
+      vip: "10.0.0.201/24"
+      virtual_routes:
+        - "0.0.0.0/0 via 10.0.0.1 dev ens192 metric 5"
+      haproxy: 1
+      auth_type: PASS
+      auth_password: MySecurePass1
+      # unicast_src_ip: 10.0.0.12
+      # unicast_peers:
+      #     - 10.0.0.11
+
+
+    - name: "haproxy_2"
+      priority: 10
+      iface: ens192
+      state: BACKUP
+      router_id: 21
+      vip: "10.0.0.202/24"
+      # unicast_src_ip: 10.0.0.12
+      virtual_routes:
+        - "0.0.0.0/0 via 10.0.0.1 dev ens192 metric 6"
+      haproxy: 1
+      auth_type: PASS
+      auth_password: MySecurePass2
+      # unicast_src_ip: 10.0.0.12
+      # unicast_peers:
+      #     - 10.0.0.11
+
+
