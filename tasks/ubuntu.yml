@@ -2,57 +2,57 @@
 # keepalived role (ubuntu)
 #
 
-- name: add keepalived repo
-  apt_repository: repo="ppa:keepalived/stable" state=present update_cache=yes
+- name: Add keepalived repo
+  ansible.builtin.apt_repository: repo="ppa:keepalived/stable" state=present update_cache=yes
   when: ansible_facts['distribution_major_version']|int < 18
 
-- name: install keepalived
-  apt: name="keepalived" state="latest"
+- name: Install keepalived
+  ansible.builtin.apt: name="keepalived" state="latest"
 
-- name: copy systemd script
-  copy: src=keepalived.service dest=/etc/systemd/system/keepalived.service
+- name: Copy systemd script
+  ansible.builtin.copy: src=keepalived.service dest=/etc/systemd/system/keepalived.service
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version >= '16.04'
   notify: reload systemd daemon
 
-- name: copy netdev dummy file keepalived0
-  copy: src=90-keepalived.netdev dest=/lib/systemd/network/90-keepalived.netdev
+- name: Copy netdev dummy file keepalived0
+  ansible.builtin.copy: src=90-keepalived.netdev dest=/lib/systemd/network/90-keepalived.netdev
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version >= '16.04'
   notify:
     - reload systemd daemon
     - restart systemd network
 
-- name: install config
-  template: src={{ keepalived_template }} dest=/etc/keepalived/keepalived.conf
+- name: Install config
+  ansible.builtin.template: src={{ keepalived_template }} dest=/etc/keepalived/keepalived.conf
   notify: restart keepalived
-
 
 #---------------------------------------------------------------------
 ### Keepalived Exporter
 #---------------------------------------------------------------------
 
 - name: Check if Keepalived exporter is installed
-  command: "which keepalived-exporter"
+  ansible.builtin.command: "which keepalived-exporter"
   register: keepalived_exporter_path
   changed_when: false
   ignore_errors: true
 
 - name: Set Keepalived exporter installation status
-  set_fact:
+  ansible.builtin.set_fact:
     keepalived_exporter_installed: "{{ keepalived_exporter_path.rc == 0 }}"
   when: keepalived_exporter_path.stdout is defined
 
 - block:
     - name: Download keepalived-exporter package
-      get_url:
+      ansible.builtin.get_url:
         url: https://github.com/mehdy/keepalived-exporter/releases/download/v{{keepalived_exporter_config.version}}/keepalived-exporter-{{keepalived_exporter_config.version}}.linux-amd64.deb
         dest: /tmp/keepalived-exporter-{{keepalived_exporter_config.version}}.linux-amd64.deb
     - name: Install keepalived-exporter package
       become: true
-      apt:
+      ansible.builtin.apt:
         deb: /tmp/keepalived-exporter-{{keepalived_exporter_config.version}}.linux-amd64.deb
   when: keepalived_exporter_installed == false
-- name: copy keepalived exporter
-  template:
+
+- name: Copy keepalived exporter
+  ansible.builtin.template:
     src: keepalived-exporter.service.j2
     dest: /etc/systemd/system/keepalived-exporter.service
     mode: 0644
