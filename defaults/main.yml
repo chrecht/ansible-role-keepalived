@@ -2,6 +2,8 @@
 # defaults file for ansible-role-keepalived
 keepalived_template: keepalived.conf.j2
 
+keepalived: {}
+
 keepalived_exporter_config:
   version: 1.3.3
   port: 9165

@@ -57,6 +57,7 @@ vrrp_sync_group {{ vrrp_sync_group.name }} {
 
 
 
+{% if keepalived.instances is defined %}
 {% for instance in keepalived.instances %}
 
  
@@ -132,3 +133,4 @@ vrrp_instance {{ instance.name }} {% raw %} { {% endraw %}
   {% raw %}}{% endraw %}
 
 {% endfor %}
+{% endif %}

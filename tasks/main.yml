@@ -3,6 +3,17 @@
 # Keepalived role
 #
 
+- name: Assert required variables are defined
+  ansible.builtin.assert:
+    that:
+      - keepalived is defined
+      - keepalived | length > 0
+      - keepalived.instances is defined
+      - keepalived.instances | length > 0
+    fail_msg: >-
+      'keepalived' and 'keepalived.instances' must be defined and non-empty.
+      Set them in host_vars or group_vars for each host.
+
 - name: Install keepalived (ubuntu)
   ansible.builtin.include_tasks: ubuntu.yml
   when: ansible_distribution == 'Ubuntu'
