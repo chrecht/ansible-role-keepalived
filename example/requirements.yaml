@@ -1,0 +1,7 @@
+---
+roles:
+
+  - name: ansible-role-keepalived
+    src: git@github.com:chrecht/ansible-role-keepalived.git
+    scm: git
+    version: v0.0.1
