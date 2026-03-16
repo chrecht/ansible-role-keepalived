@@ -22,7 +22,7 @@
     - restart systemd network
 
 - name: install config
-  template: src={{ template }} dest=/etc/keepalived/keepalived.conf
+  template: src={{ keepalived_template }} dest=/etc/keepalived/keepalived.conf
   notify: restart keepalived
 
 
