@@ -1,0 +1,17 @@
+---
+
+- name: restart keepalived
+  service: name=keepalived state=restarted
+
+- name: reload systemd daemon
+  systemd: name=keepalived enabled=yes daemon_reload=yes state=restarted
+
+- name: restart systemd network
+  systemd: name=systemd-networkd state=restarted
+
+- name: keepalived-exporter restart
+  systemd:
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    name: keepalived-exporter.service

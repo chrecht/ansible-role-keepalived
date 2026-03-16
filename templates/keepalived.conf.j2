@@ -1,0 +1,134 @@
+global_defs {{"{"}} 
+    max_auto_priority 99
+    enable_script_security
+    script_user root
+{% if keepalived.notification_email is defined %}
+    notification_email {{"{"}}
+        {% for email in keepalived.notification_email %}
+        {{ email }}
+        {% endfor %}        
+    {{"}"}}
+{% endif %}
+{% if keepalived.notification_email_from is defined %}
+    notification_email_from {{ keepalived.notification_email_from }}
+{% endif %}
+{% if keepalived.smtp_server is defined %}
+    smtp_server {{ keepalived.smtp_server }}
+{% endif %}
+{% if keepalived.smtp_connect_timeout is defined %}
+    smtp_connect_timeout {{ keepalived.smtp_connect_timeout }}
+{% endif %}
+{{"}"}}
+
+{% if  keepalived.haproxy is defined  %}
+{% raw %}
+vrrp_track_process haproxy {
+    process haproxy
+    quorum 1
+    delay 2
+}
+{% endraw %}
+{% endif %}
+
+{% if keepalived.haproxy_api_gateway is defined %}
+{% raw %}
+vrrp_script check_haproxy_api_gateway {
+   script "/opt/haproxy-api-gateway/current/bin/keepalived_check.sh"
+   interval 2
+  
+}
+{% endraw %}
+{% endif %}
+
+
+
+{% if keepalived.vrrp_sync_group is defined %}
+{% for vrrp_sync_group in keepalived.vrrp_sync_group %}
+vrrp_sync_group {{ vrrp_sync_group.name }} {
+   group {
+      {% for group_item in vrrp_sync_group.group %}
+      {{ group_item }}
+      {% endfor %}
+   }
+}
+{% endfor %}
+{% endif %}
+
+
+
+
+{% for instance in keepalived.instances %}
+
+ 
+vrrp_instance {{ instance.name }} {% raw %} { {% endraw %}
+   
+   interface {{ instance.iface }}
+   state {{ instance.state }}
+   virtual_router_id {{ instance.router_id }}
+   smtp_alert
+   priority {{ instance.priority }}          # 101 on master, 100 on backup
+
+    authentication {
+        auth_type {{ instance.auth_type }}
+        auth_pass {{ instance.auth_password }}
+   }
+
+    {% if instance.unicast_src_ip is defined %}
+        unicast_src_ip {{ instance.unicast_src_ip }}
+        unicast_peer {
+            {% for peer in instance.unicast_peers %}
+            {{ peer }}
+            {% endfor %}
+        }
+    {% endif %}
+
+   virtual_ipaddress  {% raw %} { {% endraw %}
+
+    {% if instance.vip is string %}
+        {{ instance.vip }}
+    {% else %}
+        {% for vip in instance.vip %}
+            {{ vip }}
+        {% endfor %}
+    {% endif %}
+
+   {% raw %} } {% endraw %}
+
+
+   {% if instance.virtual_routes is defined %}
+   virtual_routes {
+    {% for route in instance.virtual_routes %}
+        {{ route }}
+    {% endfor %}
+   }
+   {% endif %}
+
+   {% if instance.advert_int is defined %}
+   advert_int: {{ instance.advert_int }}
+   {% endif %}
+
+   #use_vmac
+
+   {% if instance.garp_master_delay is defined %}
+   garp_master_delay: {{ instance.garp_master_delay }}
+   {% endif %}
+   
+   {% if instance.haproxy is defined %}
+   {% raw %}
+    track_process {
+	    haproxy
+    }
+   {% endraw %}
+   {% endif %}
+
+
+   {% if instance.haproxy_api_gateway is defined %}
+   track_script {
+       check_haproxy_api_gateway
+   }
+   {% endif %}
+   
+
+  {% raw %}}{% endraw %}
+
+{% endfor %}
