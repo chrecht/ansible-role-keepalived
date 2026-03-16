@@ -1,23 +1,23 @@
 ---
 
-- name: Restart keepalived
+- name: restart keepalived
   ansible.builtin.service:
     name: keepalived
     state: restarted
 
-- name: Reload systemd daemon
+- name: reload systemd daemon
   ansible.builtin.systemd:
     name: keepalived
     enabled: true
     daemon_reload: true
     state: restarted
 
-- name: Restart systemd network
+- name: restart systemd network
   ansible.builtin.systemd:
     name: systemd-networkd
     state: restarted
 
-- name: Keepalived-exporter restart
+- name: keepalived-exporter restart
   ansible.builtin.systemd:
     state: restarted
     enabled: true
